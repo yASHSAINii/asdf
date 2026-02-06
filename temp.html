@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Nature Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s;
+            overflow: auto; /* CHANGED from hidden to auto */
+            padding: 20px; /* ADDED for mobile spacing */
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 90%;
+            padding: 40px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 20px 0; /* ADDED for mobile spacing */
+        }
+        
+        h1 {
+            color: white;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.3rem;
+            margin-bottom: 50px;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .gallery-item {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.5s, box-shadow 0.5s;
+            background-color: white;
+            height: 220px;
+            position: relative;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .gallery-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8) 100%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .action-btn {
+            padding: 20px 45px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            min-width: 220px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+        
+        .action-btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-1 {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+        }
+        
+        .btn-2 {
+            background: linear-gradient(45deg, #4776E6, #8E54E9);
+        }
+        
+        .btn-3 {
+            background: linear-gradient(45deg, #00b09b, #96c93d);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
+            letter-spacing: 1.5px;
+        }
+        
+        .btn-text {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+        
+        /* Scary section - hidden by default */
+        .scary-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s;
+            overflow: hidden; /* Keep overlay non-scrollable */
+        }
+        
+        .ghost-image {
+            max-width: 90%;
+            max-height: 70%;
+            object-fit: contain;
+            opacity: 0;
+            transform: scale(0.7) rotate(-5deg);
+            filter: drop-shadow(0 0 30px rgba(255, 0, 0, 0.7));
+            transition: opacity 0.2s, transform 0.4s;
+        }
+        
+        .scary-message {
+            color: #ff0000;
+            font-size: 4rem;
+            margin-top: 40px;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+            opacity: 0;
+            font-family: 'Creepster', cursive;
+            letter-spacing: 5px;
+        }
+        
+        /* Loading indicator - hidden after load */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-size: 2rem;
+            flex-direction: column;
+            overflow: hidden; /* Keep loading screen non-scrollable */
+        }
+        
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Additional subtle animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 5s ease-in-out infinite;
+        }
+        
+        /* Blood drips for extra effect */
+        .blood-drip {
+            position: fixed; /* CHANGED from absolute to fixed */
+            width: 3px;
+            height: 100px;
+            background: linear-gradient(to bottom, rgba(255, 0, 0, 0.8), transparent);
+            top: -100px;
+            animation: drip 3s infinite;
+            z-index: 10001; /* Ensure drips appear above everything */
+        }
+        
+        @keyframes drip {
+            0% { top: -100px; opacity: 0; }
+            10% { opacity: 1; }
+            100% { top: 100vh; opacity: 0; }
+        }
+        
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            body {
+                display: block; /* CHANGED from flex to block for natural scrolling */
+                padding: 15px;
+                min-height: auto; /* Allow natural height */
+                overflow-y: auto; /* Ensure vertical scrolling */
+            }
+            
+            .container {
+                width: 100%;
+                padding: 25px 20px;
+                margin: 0 auto 30px; /* Center with bottom margin */
+                display: block; /* Ensure proper block display */
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+                margin-bottom: 15px;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+                margin-bottom: 30px;
+                line-height: 1.5;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                margin-bottom: 35px;
+            }
+            
+            .gallery-item {
+                height: 200px;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 18px;
+                margin-top: 30px;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+                padding: 18px 35px;
+                font-size: 1.2rem;
+            }
+            
+            .scary-message {
+                font-size: 2.5rem;
+                margin-top: 25px;
+                padding: 0 15px;
+            }
+            
+            .ghost-image {
+                max-height: 60%;
+            }
+        }
+        
+        /* Extra small phones */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .gallery-item {
+                height: 180px;
+            }
+            
+            .action-btn {
+                padding: 16px 25px;
+                font-size: 1.1rem;
+            }
+            
+            .scary-message {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Prevent horizontal scroll */
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading screen -->
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <div>Loading Beautiful Gallery...</div>
+    </div>
+    
+    <!-- Main beautiful content -->
+    <div class="container floating">
+        <h1>🌸 Beautiful Nature Gallery 🌸</h1>
+        <p class="subtitle">Discover the most breathtaking natural wonders from around the world. Click on the buttons below to explore different categories of stunning photography.</p>
+        
+        <div class="gallery">
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Mountain Landscape">
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Forest">
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Beach Sunset">
+            </div>
+        </div>
+        
+        <p style="color: white; font-size: 1.3rem; margin-bottom: 25px; font-weight: 300;">Select a category to view more images:</p>
+        
+        <div class="button-container">
+            <button class="action-btn btn-1" id="mountainsBtn">
+                <span class="btn-icon">🏔️</span>
+                <span class="btn-text">Mountain Views</span>
+            </button>
+            <button class="action-btn btn-2" id="forestsBtn">
+                <span class="btn-icon">🌲</span>
+                <span class="btn-text">Enchanted Forests</span>
+            </button>
+            <button class="action-btn btn-3" id="oceansBtn">
+                <span class="btn-icon">🌊</span>
+                <span class="btn-text">Ocean & Beaches</span>
+            </button>
+        </div>
+        
+        <p style="color: rgba(255, 255, 255, 0.7); margin-top: 40px; font-size: 0.9rem;">© 2023 Nature Photography Gallery. All images are licensed for personal use.</p>
+    </div>
+    
+    <!-- Scary overlay (hidden by default) -->
+    <div class="scary-overlay" id="scaryOverlay">
+        <img src="/9364b8dc-ae71-4b6a-9e53-cde33d176937.jpg" alt="Scary Ghost" class="ghost-image" id="ghostImage">
+        <div class="scary-message" id="scaryMessage">LOOK BEHIND YOU</div>
+    </div>
+
+    <script>
+        // Preload scary resources
+        const ghostImages = [
+            '/9364b8dc-ae71-4b6a-9e53-cde33d176937.jpg',
+            '/9364b8dc-ae71-4b6a-9e53-cde33d176937.jpg',
+            '/9364b8dc-ae71-4b6a-9e53-cde33d176937.jpg'
+        ];
+        
+        const scaryMessages = [
+            "LOOK BEHIND YOU",
+            "GET OUT NOW",
+            "SHE'S BEHIND YOU",
+            "DON'T LOOK BACK",
+            "YOU'RE NOT ALONE",
+            "I CAN SEE YOU"
+        ];
+        
+        // Create audio context for sound (more reliable than HTML audio)
+        let audioContext;
+        let screamBuffer;
+        
+        // Function to load scream sound
+        async function loadScreamSound() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const response = await fetch('https://assets.mixkit.co/sfx/preview/mixkit-horror-scream-2836.mp3');
+                const arrayBuffer = await response.arrayBuffer();
+                screamBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            } catch (error) {
+                console.log("Couldn't load audio, using fallback");
+                // Create a fallback scary sound using oscillator
+                screamBuffer = null;
+            }
+        }
+        
+        // Play the scream sound
+        function playScream() {
+            if (audioContext && screamBuffer) {
+                const source = audioContext.createBufferSource();
+                source.buffer = screamBuffer;
+                source.connect(audioContext.destination);
+                source.start();
+            } else {
+                // Fallback: generate a scary sound using Web Audio API
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    
+                    oscillator.frequency.setValueAtTime(200, ctx.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.5);
+                    
+                    gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+                    
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 1.5);
+                } catch (e) {
+                    console.log("Couldn't play sound");
+                }
+            }
+        }
+        
+        // Trigger the scary effect
+        function triggerScare() {
+            const overlay = document.getElementById('scaryOverlay');
+            const ghostImage = document.getElementById('ghostImage');
+            const scaryMessage = document.getElementById('scaryMessage');
+            
+            // Randomly select ghost and message
+            const randomImageIndex = Math.floor(Math.random() * ghostImages.length);
+            const randomMessageIndex = Math.floor(Math.random() * scaryMessages.length);
+            
+            ghostImage.src = ghostImages[randomImageIndex];
+            scaryMessage.textContent = scaryMessages[randomMessageIndex];
+            
+            // Show overlay
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+            }, 10);
+            
+            // Play scream sound
+            playScream();
+            
+            // Add blood drips for extra effect
+            addBloodDrips();
+            
+            // Animate ghost and message
+            setTimeout(() => {
+                ghostImage.style.opacity = '1';
+                ghostImage.style.transform = 'scale(1) rotate(0deg)';
+            }, 100);
+            
+            setTimeout(() => {
+                scaryMessage.style.opacity = '1';
+            }, 600);
+            
+            // After 7 seconds, slowly fade out
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.querySelectorAll('.blood-drip').forEach(drip => drip.remove());
+                }, 3000);
+            }, 7000);
+        }
+        
+        // Add blood drip animation
+        function addBloodDrips() {
+            for (let i = 0; i < 15; i++) {
+                const drip = document.createElement('div');
+                drip.className = 'blood-drip';
+                drip.style.left = `${Math.random() * 100}vw`;
+                drip.style.animationDelay = `${Math.random() * 2}s`;
+                drip.style.animationDuration = `${2 + Math.random() * 3}s`;
+                drip.style.width = `${1 + Math.random() * 4}px`;
+                document.body.appendChild(drip);
+                
+                // Remove drip after animation completes
+                setTimeout(() => {
+                    if (drip.parentNode) {
+                        drip.remove();
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Set up button events
+        function setupPrank() {
+            const buttons = document.querySelectorAll('.action-btn');
+            
+            // Trigger on hover (after 1 second)
+            buttons.forEach(button => {
+                let hoverTimer;
+                
+                button.addEventListener('mouseenter', () => {
+                    hoverTimer = setTimeout(triggerScare, 1000);
+                });
+                
+                button.addEventListener('mouseleave', () => {
+                    clearTimeout(hoverTimer);
+                });
+                
+                // Also trigger on click
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    triggerScare();
+                });
+                
+                // For mobile touch devices
+                button.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    triggerScare();
+                });
+            });
+            
+            // Random chance to trigger when moving mouse around page
+            let moveCount = 0;
+            document.addEventListener('mousemove', () => {
+                moveCount++;
+                // 1% chance after 50 mouse movements
+                if (moveCount > 50 && Math.random() < 0.01) {
+                    triggerScare();
+                    moveCount = 0;
+                }
+            });
+            
+            // Trigger when trying to leave the page
+            document.addEventListener('mouseleave', (e) => {
+                if (e.clientY < 10) {
+                    // 30% chance when leaving window
+                    if (Math.random() < 0.3) {
+                        triggerScare();
+                    }
+                }
+            });
+            
+            // Hide loading screen
+            document.getElementById('loadingScreen').style.display = 'none';
+        }
+        
+        // Initialize everything when page loads
+        window.addEventListener('load', async () => {
+            // Load sound first
+            await loadScreamSound();
+            
+            // Preload ghost images
+            ghostImages.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+            
+            // Set up the prank
+            setupPrank();
+            
+            // Random scare after 30-60 seconds if user is still on page
+            setTimeout(() => {
+                if (Math.random() < 0.5) {
+                    triggerScare();
+                }
+            }, 30000 + Math.random() * 30000);
+            
+            // Mobile-specific: prevent zooming on double-tap
+            document.addEventListener('touchstart', function(event) {
+                if (event.touches.length > 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+        });
+    </script>
+</body>
+</html>
